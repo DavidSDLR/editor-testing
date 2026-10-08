@@ -1,0 +1,1341 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SAGA EDITOR</title>
+  <style>
+    :root {
+      --bg: #f3f2ee;
+      --panel: #fcfbf8;
+      --panel-alt: #f7f6f2;
+      --line: #e3e0d8;
+      --line-strong: #cfccc2;
+      --text: #30302c;
+      --muted: #706d65;
+      --accent: #5874a0;
+      --accent-soft: #eef2f8;
+      --accent-line: #d8e2ee;
+      --accent-text: #36516f;
+      --danger: #9a4b44;
+      --success: #4d6b53;
+      --radius: 10px;
+      --shadow: 0 1px 2px rgba(36, 34, 30, 0.06), 0 8px 24px rgba(36, 34, 30, 0.04);
+      --screen-width: 250px;
+      --book-width: 750px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(243, 242, 238, 0.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--line);
+      padding: 10px 20px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+
+    .logo {
+      width: 26px;
+      height: 26px;
+      display: grid;
+      place-items: center;
+      background: #313b45;
+      color: #f5f4ef;
+      border-radius: 6px;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .brand .title {
+      font-size: 12px;
+      font-weight: 650;
+      letter-spacing: 0.12em;
+      color: #3a3833;
+    }
+
+    main {
+      max-width: 1120px;
+      margin: 24px auto 64px;
+      padding: 0 20px;
+      display: grid;
+      gap: 20px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0));
+    }
+
+    .panel-header h2 {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #5a574f;
+    }
+
+    .panel-header p {
+      margin: 4px 0 0;
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+
+    .panel-body {
+      padding: 20px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding: 14px 20px 0;
+    }
+
+    .tab {
+      border: 1px solid transparent;
+      background: transparent;
+      padding: 7px 12px;
+      border-radius: 8px;
+      color: #66635b;
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .tab:hover {
+      background: #f1efe9;
+    }
+
+    .tab.active {
+      background: var(--accent-soft);
+      border-color: var(--accent-line);
+      color: var(--accent-text);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+
+    .tabpanel {
+      padding: 20px;
+    }
+
+    .tabpanel[hidden] {
+      display: none;
+    }
+
+    .phone-layout {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .book {
+      width: var(--book-width);
+      max-width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--panel-alt);
+      padding: 18px;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
+      overflow: hidden;
+    }
+
+    .book-track {
+      display: flex;
+      transition: transform 0.28s ease;
+    }
+
+    .screen {
+      flex: 0 0 var(--screen-width);
+      min-width: var(--screen-width);
+      display: grid;
+      place-items: center;
+    }
+
+    .phone {
+      width: 220px;
+      height: 420px;
+      background: #25282c;
+      border-radius: 34px;
+      padding: 10px;
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.14), inset 0 1px 1px rgba(255, 255, 255, 0.06);
+      overflow: hidden;
+    }
+
+    .phone-island {
+      width: 70px;
+      height: 18px;
+      background: #101214;
+      border-radius: 10px;
+      margin: 2px auto 8px;
+    }
+
+    .screen-body {
+      width: 100%;
+      height: 100%;
+      background: #fff;
+      border-radius: 24px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow: auto;
+    }
+
+    .image-preview {
+      border: 1px solid #e2e6ec;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #f5f7fa;
+    }
+
+    .image-preview img {
+      width: 100%;
+      height: 110px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .add-image {
+      border: 1px dashed #b9c4d4;
+      background: #f8fafc;
+      color: #465b74;
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 12.5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .add-image:hover {
+      background: #eef3f9;
+      border-color: #93a8c2;
+    }
+
+    .plus-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: white;
+      display: grid;
+      place-items: center;
+      font-size: 12px;
+      line-height: 1;
+    }
+
+    .phone-text {
+      flex: 1;
+      min-height: 140px;
+      border: 1px solid #e2e0da;
+      border-radius: 10px;
+      background: #fbfaf7;
+      padding: 12px;
+      font-size: 13.5px;
+      line-height: 1.55;
+      color: #33322e;
+      outline: none;
+      overflow: auto;
+    }
+
+    .phone-text:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(88, 116, 160, 0.12);
+    }
+
+    .stack-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .ctrl {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 1px solid var(--line-strong);
+      background: #fff;
+      cursor: pointer;
+      font-size: 15px;
+      color: #55524b;
+      box-shadow: var(--shadow);
+    }
+
+    .ctrl:hover {
+      background: #f3f1ec;
+    }
+
+    .ctrl:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .page-indicator {
+      font-size: 12px;
+      color: var(--muted);
+      min-width: 58px;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .plus {
+      justify-self: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 1px solid var(--accent-line);
+      background: var(--accent-soft);
+      color: var(--accent-text);
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+    }
+
+    .plus:hover {
+      background: #e3ebf5;
+    }
+
+    .hint {
+      margin: 0;
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .description {
+      margin-top: 18px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      background: var(--panel-alt);
+      border-radius: 10px;
+      font-size: 13px;
+      color: #5b584f;
+    }
+
+    .asset-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 18px;
+    }
+
+    .file-window {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .file-window-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      background: var(--panel-alt);
+    }
+
+    .window-dots {
+      display: flex;
+      gap: 5px;
+    }
+
+    .window-dots span {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #d7d4cc;
+    }
+
+    .file-title {
+      font-size: 13px;
+      font-weight: 650;
+      color: #4d4a43;
+      flex: 1;
+    }
+
+    .upload-button {
+      border: 1px solid var(--accent-line);
+      background: var(--accent-soft);
+      color: var(--accent-text);
+      border-radius: 8px;
+      padding: 7px 10px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .upload-button:hover {
+      background: #e3ebf5;
+    }
+
+    .file-list {
+      list-style: none;
+      margin: 0;
+      padding: 8px;
+      min-height: 110px;
+      max-height: 260px;
+      overflow: auto;
+      display: grid;
+      gap: 6px;
+    }
+
+    .file-row {
+      display: grid;
+      grid-template-columns: auto 1fr auto auto;
+      gap: 10px;
+      align-items: center;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 9px;
+    }
+
+    .file-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 7px;
+      display: grid;
+      place-items: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: #495a70;
+      background: #edf1f6;
+      border: 1px solid #dce3ec;
+    }
+
+    .file-icon.csv {
+      background: #f2f3ef;
+      color: #5d6153;
+      border-color: #dfe0d8;
+    }
+
+    .file-name {
+      font-size: 13px;
+      color: #3b3a35;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .file-size {
+      font-size: 11.5px;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .remove {
+      border: 1px solid transparent;
+      background: transparent;
+      color: #8a5a55;
+      font-size: 12px;
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 6px;
+    }
+
+    .remove:hover {
+      background: #f7efee;
+      border-color: #e4d3d1;
+    }
+
+    .file-empty {
+      color: var(--muted);
+      font-size: 12.5px;
+      padding: 10px;
+    }
+
+    .settings {
+      display: grid;
+      gap: 12px;
+    }
+
+    .setting-row {
+      display: grid;
+      grid-template-columns: 230px 1fr;
+      gap: 14px;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid var(--line);
+      background: var(--panel-alt);
+      border-radius: 10px;
+    }
+
+    .setting-row label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #4f4c45;
+    }
+
+    .setting-row input[type="text"],
+    .setting-row select {
+      width: 100%;
+      max-width: 420px;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      padding: 9px 10px;
+      background: #fff;
+      color: var(--text);
+      font: inherit;
+    }
+
+    .setting-row input[type="text"]:focus,
+    .setting-row select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(88, 116, 160, 0.12);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .action-btn {
+      border: 1px solid var(--line-strong);
+      background: #fff;
+      color: #3d3b36;
+      padding: 10px 14px;
+      border-radius: 9px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+    }
+
+    .action-btn.primary {
+      border-color: var(--accent-line);
+      background: var(--accent-soft);
+      color: var(--accent-text);
+    }
+
+    .action-btn:hover {
+      background: #f3f1ec;
+    }
+
+    .action-btn.primary:hover {
+      background: #e3ebf5;
+    }
+
+    .status {
+      margin-top: 12px;
+      min-height: 1.2em;
+      font-size: 12.5px;
+      color: #5a574f;
+    }
+
+    .status.error {
+      color: var(--danger);
+    }
+
+    .status.success {
+      color: var(--success);
+    }
+
+    button:focus-visible,
+    input[type="text"]:focus-visible,
+    select:focus-visible,
+    .tab:focus-visible {
+      outline: 2px solid rgba(88, 116, 160, 0.45);
+      outline-offset: 2px;
+    }
+
+    @media (max-width: 760px) {
+      .phone-layout {
+        align-items: center;
+      }
+
+      .book {
+        width: 100%;
+      }
+
+      .asset-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .setting-row {
+        grid-template-columns: 1fr;
+        align-items: start;
+      }
+
+      .setting-row input[type="text"],
+      .setting-row select {
+        max-width: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand" aria-label="DLR SAGA EDITOR">
+      <span class="logo" aria-hidden="true">DLR</span>
+      <span class="title">SAGA EDITOR</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="panel" aria-labelledby="setup-heading">
+      <div class="panel-header">
+        <h2 id="setup-heading">Setup</h2>
+        <p>Configure the app screens as a leafable stack of smartphone pages.</p>
+      </div>
+
+      <div class="tabs" id="tablist" role="tablist" aria-label="Setup tabs"></div>
+      <div id="panels"></div>
+    </section>
+
+    <section class="panel" aria-labelledby="asset-upload-heading">
+      <div class="panel-header">
+        <h2 id="asset-upload-heading">Asset Upload</h2>
+        <p>Upload sound files and the configuration matrix detailing which parameter combinations correspond to which sounds.</p>
+      </div>
+
+      <div class="panel-body asset-grid">
+        <div class="file-window">
+          <div class="file-window-header">
+            <div class="window-dots" aria-hidden="true">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+            <div class="file-title">Sound files</div>
+            <button type="button" class="upload-button" data-action="upload-sound">
+              Upload sound files
+            </button>
+          </div>
+          <ul class="file-list" id="sound-file-list"></ul>
+        </div>
+
+        <div class="file-window">
+          <div class="file-window-header">
+            <div class="window-dots" aria-hidden="true">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+            <div class="file-title">Configuration Matrix</div>
+            <button type="button" class="upload-button" data-action="upload-csv">
+              Upload .csv
+            </button>
+          </div>
+          <ul class="file-list" id="csv-file-list"></ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="app-settings-heading">
+      <div class="panel-header">
+        <h2 id="app-settings-heading">App Settings</h2>
+        <p>Global application configuration.</p>
+      </div>
+
+      <div class="panel-body">
+        <form class="settings" id="settingsForm" novalidate>
+          <div class="setting-row">
+            <label for="appTitle">App title</label>
+            <input
+              id="appTitle"
+              name="appTitle"
+              type="text"
+              autocomplete="off"
+              placeholder="Required for saving and packaging"
+            >
+          </div>
+
+          <div class="setting-row">
+            <label for="soundOrder">Sound presentation order</label>
+            <select id="soundOrder" name="soundOrder">
+              <option value="user" selected>User Choice</option>
+              <option value="random">Random</option>
+              <option value="file-number">By file number</option>
+            </select>
+          </div>
+
+          <div class="setting-row">
+            <label for="calibration">Calibration</label>
+            <select id="calibration" name="calibration">
+              <option value="no" selected>No</option>
+              <option value="yes">Yes</option>
+            </select>
+          </div>
+
+          <div class="setting-row">
+            <label for="backgroundSound">Allow sound player as background activity</label>
+            <select id="backgroundSound" name="backgroundSound">
+              <option value="no" selected>No</option>
+              <option value="yes">Yes</option>
+            </select>
+          </div>
+
+          <div class="setting-row">
+            <label for="recordAcoustic">Record acoustic background during app use</label>
+            <select id="recordAcoustic" name="recordAcoustic">
+              <option value="no" selected>No</option>
+              <option value="yes">Yes</option>
+            </select>
+          </div>
+        </form>
+
+        <div class="actions">
+          <button type="button" class="action-btn" id="saveBtn">
+            Save current changes
+          </button>
+          <button type="button" class="action-btn primary" id="createBtn">
+            Create app package
+          </button>
+          <button type="button" class="action-btn" id="downloadBtn">
+            Download app package
+          </button>
+        </div>
+
+        <div class="status" id="status" role="status" aria-live="polite"></div>
+      </div>
+    </section>
+  </main>
+
+  <input type="file" id="addImageInput" accept="image/*" hidden>
+  <input type="file" id="soundInput" accept="audio/*,.mp3,.wav,.ogg,.m4a" multiple hidden>
+  <input type="file" id="csvInput" accept=".csv,text/csv" multiple hidden>
+
+  <script>
+    const TABS = [
+      "Intro",
+      "Builder",
+      "Rating",
+      "Information",
+      "Sound Player",
+      "Main Hub",
+      "Calibration"
+    ];
+
+    const SCREEN_WIDTH = 250;
+
+    const tablist = document.getElementById("tablist");
+    const panels = document.getElementById("panels");
+    const panelMap = {};
+
+    const addImageInput = document.getElementById("addImageInput");
+    const soundInput = document.getElementById("soundInput");
+    const csvInput = document.getElementById("csvInput");
+    const statusEl = document.getElementById("status");
+
+    const state = {
+      activeTab: TABS[0],
+      packageCreated: false,
+      packageName: null,
+      packageTitle: null,
+      soundFiles: [],
+      csvFiles: [],
+      tabs: {}
+    };
+
+    TABS.forEach(tab => {
+      state.tabs[tab] = {
+        index: 0,
+        screens: [newScreen(tab)]
+      };
+    });
+
+    function newScreen(tab) {
+      return {
+        id: uid(),
+        image: null,
+        imageName: null,
+        text: defaultText(tab)
+      };
+    }
+
+    function defaultText(tab) {
+      return `${tab} — tap here to edit this screen text.`;
+    }
+
+    function uid() {
+      return Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+    }
+
+    function escapeHTML(value) {
+      return String(value).replace(/[&<>"']/g, char => {
+        return {
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;"
+        }[char];
+      });
+    }
+
+    function formatSize(bytes) {
+      if (!Number.isFinite(bytes)) return "";
+      if (bytes < 1024) return `${bytes} B`;
+      if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+      return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    }
+
+    function currentAppTitle() {
+      return document.getElementById("appTitle").value.trim();
+    }
+
+    function slugify(value) {
+      return value
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "") || "saga-app";
+    }
+
+    function status(message, type = "") {
+      statusEl.textContent = message;
+      statusEl.className = type ? `status ${type}` : "status";
+    }
+
+    function createTabUI() {
+      TABS.forEach((tab, i) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "tab" + (i === 0 ? " active" : "");
+        btn.id = `tab-${i}`;
+        btn.dataset.tab = tab;
+        btn.setAttribute("role", "tab");
+        btn.setAttribute("aria-controls", `panel-${i}`);
+        btn.setAttribute("aria-selected", String(i === 0));
+        btn.tabIndex = i === 0 ? 0 : -1;
+        btn.textContent = tab;
+        tablist.appendChild(btn);
+
+        const panel = document.createElement("section");
+        panel.className = "tabpanel";
+        panel.id = `panel-${i}`;
+        panel.dataset.tab = tab;
+        panel.hidden = i > 0;
+        panel.setAttribute("role", "tabpanel");
+        panel.setAttribute("aria-labelledby", `tab-${i}`);
+
+        panel.innerHTML = `
+          <div class="phone-layout">
+            <div class="book">
+              <div class="book-track"></div>
+            </div>
+
+            <div class="stack-controls">
+              <button type="button" class="ctrl" data-action="prev" aria-label="Previous screen">
+                ←
+              </button>
+              <span class="page-indicator">1 / 1</span>
+              <button type="button" class="ctrl" data-action="next" aria-label="Next screen">
+                →
+              </button>
+            </div>
+
+            <button
+              type="button"
+              class="plus"
+              data-action="add-screen"
+              aria-label="Add another smartphone screen page"
+              title="Add another smartphone screen page"
+            >
+              +
+            </button>
+
+            <p class="hint">
+              Leaf through the stack, add a page, or edit the visible screen.
+            </p>
+          </div>
+
+          <p class="description"></p>
+        `;
+
+        panels.appendChild(panel);
+        panelMap[tab] = panel;
+        renderTabPanel(tab);
+      });
+
+      activateTab(TABS[0]);
+      renderSoundList();
+      renderCsvList();
+    }
+
+    function activateTab(tab) {
+      state.activeTab = tab;
+
+      document.querySelectorAll(".tab").forEach(btn => {
+        const selected = btn.dataset.tab === tab;
+        btn.classList.toggle("active", selected);
+        btn.setAttribute("aria-selected", String(selected));
+        btn.tabIndex = selected ? 0 : -1;
+      });
+
+      Object.entries(panelMap).forEach(([name, panel]) => {
+        panel.hidden = name !== tab;
+      });
+    }
+
+    function renderTabPanel(tab) {
+      const data = state.tabs[tab];
+      const panel = panelMap[tab];
+      const track = panel.querySelector(".book-track");
+
+      track.innerHTML = "";
+
+      data.screens.forEach((screen, idx) => {
+        const page = document.createElement("div");
+        page.className = "screen";
+
+        page.innerHTML = `
+          <div class="phone">
+            <div class="phone-island"></div>
+            <div class="screen-body">
+              <div class="image-preview" ${screen.image ? "" : "hidden"}>
+                ${screen.image ? `<img src="${screen.image}" alt="Uploaded image">` : ""}
+              </div>
+
+              <button
+                type="button"
+                class="add-image"
+                data-action="add-image"
+                data-index="${idx}"
+                aria-label="Add image"
+              >
+                <span class="plus-dot" aria-hidden="true">+</span>
+                Add image
+              </button>
+
+              <div
+                class="phone-text"
+                contenteditable="true"
+                spellcheck="false"
+                data-index="${idx}"
+                aria-label="Editable text field"
+              ></div>
+            </div>
+          </div>
+        `;
+
+        const textEl = page.querySelector(".phone-text");
+        textEl.innerText = screen.text;
+        track.appendChild(page);
+      });
+
+      updateTabUI(tab);
+    }
+
+    function updateTabUI(tab) {
+      const data = state.tabs[tab];
+      const panel = panelMap[tab];
+      const track = panel.querySelector(".book-track");
+
+      track.style.transform = `translateX(-${data.index * SCREEN_WIDTH}px)`;
+
+      panel.querySelector(".page-indicator").textContent =
+        `${data.index + 1} / ${data.screens.length}`;
+
+      const prev = panel.querySelector('[data-action="prev"]');
+      const next = panel.querySelector('[data-action="next"]');
+
+      prev.disabled = data.index === 0;
+      next.disabled = data.index === data.screens.length - 1;
+
+      updateDescription(tab);
+    }
+
+    function updateDescription(tab) {
+      const data = state.tabs[tab];
+      const panel = panelMap[tab];
+      const screen = data.screens[data.index];
+
+      const text = screen.text.replace(/\s+/g, " ").trim();
+      const preview = text
+        ? (text.length > 96 ? text.slice(0, 96) + "…" : text)
+        : "empty";
+
+      const imagePart = screen.imageName
+        ? `Attached image: ${screen.imageName}.`
+        : "No image attached yet.";
+
+      const desc =
+        `Tab "${tab}": visible screen ${data.index + 1} of ${data.screens.length}. ` +
+        `${imagePart} Text: "${preview}".`;
+
+      panel.querySelector(".description").textContent = desc;
+    }
+
+    function addScreen(tab) {
+      const data = state.tabs[tab];
+      data.screens.push(newScreen(tab));
+      data.index = data.screens.length - 1;
+      renderTabPanel(tab);
+      status(`Added a new screen to ${tab}.`, "success");
+    }
+
+    function changeIndex(tab, delta) {
+      const data = state.tabs[tab];
+      data.index = Math.max(
+        0,
+        Math.min(data.screens.length - 1, data.index + delta)
+      );
+      updateTabUI(tab);
+    }
+
+    function renderSoundList() {
+      renderFileList(document.getElementById("sound-file-list"), state.soundFiles, "sound");
+    }
+
+    function renderCsvList() {
+      renderFileList(document.getElementById("csv-file-list"), state.csvFiles, "csv");
+    }
+
+    function renderFileList(listEl, files, kind) {
+      listEl.innerHTML = "";
+
+      if (!files.length) {
+        const li = document.createElement("li");
+        li.className = "file-empty";
+        li.textContent = "No files uploaded yet.";
+        listEl.appendChild(li);
+        return;
+      }
+
+      files.forEach(file => {
+        const li = document.createElement("li");
+        li.className = "file-row";
+
+        li.innerHTML = `
+          <span class="file-icon ${kind}" aria-hidden="true">
+            ${kind === "sound" ? "♪" : "CSV"}
+          </span>
+          <span class="file-name" title="${escapeHTML(file.name)}">
+            ${escapeHTML(file.name)}
+          </span>
+          <span class="file-size">${formatSize(file.size)}</span>
+          <button
+            type="button"
+            class="remove"
+            data-action="remove-${kind}"
+            data-id="${file.id}"
+          >
+            Remove
+          </button>
+        `;
+
+        listEl.appendChild(li);
+      });
+    }
+
+    function collectPackage() {
+      return {
+        format: "saga-editor-package",
+        version: 1,
+        created: new Date().toISOString(),
+        app: {
+          title: state.packageTitle || currentAppTitle() || "Untitled Saga App",
+          settings: {
+            soundPresentationOrder: document.getElementById("soundOrder").value,
+            calibration: document.getElementById("calibration").value,
+            allowSoundPlayerBackground: document.getElementById("backgroundSound").value,
+            recordAcousticBackground: document.getElementById("recordAcoustic").value
+          }
+        },
+        setup: Object.fromEntries(
+          TABS.map(tab => {
+            const data = state.tabs[tab];
+            return [
+              tab,
+              {
+                currentScreen: data.index,
+                screens: data.screens.map(screen => ({
+                  text: screen.text.trim(),
+                  imageName: screen.imageName,
+                  imageData: screen.image
+                }))
+              }
+            ];
+          })
+        ),
+        assets: {
+          soundFiles: state.soundFiles.map(file => ({
+            name: file.name,
+            size: file.size,
+            type: file.type
+          })),
+          configurationMatrix: state.csvFiles.map(file => ({
+            name: file.name,
+            size: file.size,
+            type: file.type
+          }))
+        }
+      };
+    }
+
+    function downloadPackage() {
+      const pkg = collectPackage();
+      const blob = new Blob([JSON.stringify(pkg, null, 2)], {
+        type: "application/json"
+      });
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+
+      a.href = url;
+      a.download = state.packageName || `${slugify(pkg.app.title)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    let imageTarget = null;
+
+    document.addEventListener("click", event => {
+      const actionEl = event.target.closest("[data-action]");
+      if (!actionEl) return;
+
+      const action = actionEl.dataset.action;
+
+      if (action === "add-screen") {
+        const panel = actionEl.closest(".tabpanel");
+        addScreen(panel.dataset.tab);
+        return;
+      }
+
+      if (action === "prev" || action === "next") {
+        const panel = actionEl.closest(".tabpanel");
+        changeIndex(panel.dataset.tab, action === "next" ? 1 : -1);
+        return;
+      }
+
+      if (action === "add-image") {
+        const panel = actionEl.closest(".tabpanel");
+        imageTarget = {
+          tab: panel.dataset.tab,
+          index: Number(actionEl.dataset.index)
+        };
+        addImageInput.value = "";
+        addImageInput.click();
+        return;
+      }
+
+      if (action === "upload-sound") {
+        soundInput.value = "";
+        soundInput.click();
+        return;
+      }
+
+      if (action === "upload-csv") {
+        csvInput.value = "";
+        csvInput.click();
+        return;
+      }
+
+      if (action === "remove-sound") {
+        state.soundFiles = state.soundFiles.filter(file => file.id !== actionEl.dataset.id);
+        renderSoundList();
+        return;
+      }
+
+      if (action === "remove-csv") {
+        state.csvFiles = state.csvFiles.filter(file => file.id !== actionEl.dataset.id);
+        renderCsvList();
+        return;
+      }
+    });
+
+    tablist.addEventListener("click", event => {
+      const btn = event.target.closest(".tab");
+      if (!btn) return;
+      activateTab(btn.dataset.tab);
+    });
+
+    tablist.addEventListener("keydown", event => {
+      if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+
+      const tabs = Array.from(tablist.querySelectorAll(".tab"));
+      const current = tabs.findIndex(btn => btn.dataset.tab === state.activeTab);
+
+      let next = current;
+      if (event.key === "ArrowRight") {
+        next = (current + 1) % tabs.length;
+      } else {
+        next = (current - 1 + tabs.length) % tabs.length;
+      }
+
+      event.preventDefault();
+      tabs[next].focus();
+      activateTab(tabs[next].dataset.tab);
+    });
+
+    document.addEventListener("input", event => {
+      if (!event.target.classList.contains("phone-text")) return;
+
+      const panel = event.target.closest(".tabpanel");
+      if (!panel) return;
+
+      const tab = panel.dataset.tab;
+      const index = Number(event.target.dataset.index);
+
+      state.tabs[tab].screens[index].text = event.target.innerText;
+      updateDescription(tab);
+    });
+
+    document.addEventListener("paste", event => {
+      const el = event.target.closest(".phone-text");
+      if (!el) return;
+
+      event.preventDefault();
+
+      const text = (event.clipboardData || window.clipboardData).getData("text");
+      document.execCommand("insertText", false, text);
+    });
+
+    addImageInput.addEventListener("change", event => {
+      const file = event.target.files[0];
+
+      if (!file || !imageTarget) return;
+
+      if (!file.type.startsWith("image/")) {
+        status("Please choose an image file.", "error");
+        return;
+      }
+
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        const { tab, index } = imageTarget;
+        const screen = state.tabs[tab].screens[index];
+
+        screen.image = reader.result;
+        screen.imageName = file.name;
+
+        renderTabPanel(tab);
+        imageTarget = null;
+
+        status(`Image added to ${tab}, screen ${index + 1}.`, "success");
+      };
+
+      reader.onerror = () => {
+        status("Could not read the image file.", "error");
+        imageTarget = null;
+      };
+
+      reader.readAsDataURL(file);
+    });
+
+    soundInput.addEventListener("change", event => {
+      const files = Array.from(event.target.files || []);
+      if (!files.length) return;
+
+      const added = files.map(file => ({
+        id: uid(),
+        name: file.name,
+        size: file.size,
+        type: file.type || "audio"
+      }));
+
+      state.soundFiles.push(...added);
+      renderSoundList();
+
+      status(`${added.length} sound file${added.length === 1 ? "" : "s"} uploaded.`, "success");
+    });
+
+    csvInput.addEventListener("change", event => {
+      const files = Array.from(event.target.files || []);
+      if (!files.length) return;
+
+      const added = files.map(file => ({
+        id: uid(),
+        name: file.name,
+        size: file.size,
+        type: file.type || "text/csv"
+      }));
+
+      state.csvFiles.push(...added);
+      renderCsvList();
+
+      status(`${added.length} configuration file${added.length === 1 ? "" : "s"} uploaded.`, "success");
+    });
+
+    document.getElementById("saveBtn").addEventListener("click", () => {
+      const title = currentAppTitle();
+
+      if (!title) {
+        status("App title is required to save current changes.", "error");
+        document.getElementById("appTitle").focus();
+        return;
+      }
+
+      state.packageTitle = title;
+
+      if (state.packageCreated) {
+        state.packageName = `${slugify(title)}.json`;
+      }
+
+      status("Current changes saved.", "success");
+    });
+
+    document.getElementById("createBtn").addEventListener("click", () => {
+      const title = currentAppTitle();
+
+      if (!title) {
+        status("App title is required to create an app package.", "error");
+        document.getElementById("appTitle").focus();
+        return;
+      }
+
+      state.packageCreated = true;
+      state.packageTitle = title;
+      state.packageName = `${slugify(title)}.json`;
+
+      status(`App package created: ${state.packageName}`, "success");
+    });
+
+    document.getElementById("downloadBtn").addEventListener("click", () => {
+      if (!state.packageCreated) {
+        status("Create an app package before downloading.", "error");
+        return;
+      }
+
+      downloadPackage();
+      status("App package download started.", "success");
+    });
+
+    createTabUI();
+  </script>
+</body>
+</html>
