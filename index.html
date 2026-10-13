@@ -777,10 +777,10 @@
       tabs: {}
     };
 
-    TABS.forEach(tab => {
+    TABS.forEach((tab, i) => {
       state.tabs[tab] = {
         index: 0,
-        screens: [newScreen(tab, description)]
+        screens: [newScreen(tab, TABS_DESCRIPTION[i])]
       };
     });
 
@@ -794,7 +794,7 @@
     }
 
     function defaultText(tab, description) {
-      return `${tab} — ${description}`;
+      return `${tab} — ${description || "Should be self-explanatory."}`;
     }
 
     function uid() {
@@ -1008,7 +1008,8 @@
 
     function addScreen(tab) {
       const data = state.tabs[tab];
-      data.screens.push(newScreen(tab, description));
+      const desc = TABS_DESCRIPTION[TABS.indexOf(tab)]
+      data.screens.push(newScreen(tab, desc));
       data.index = data.screens.length - 1;
       renderTabPanel(tab);
       status(`Added a new screen to ${tab}.`, "success");
