@@ -1008,7 +1008,7 @@
 
     function addScreen(tab) {
       const data = state.tabs[tab];
-      const desc = TABS_DESCRIPTION[TABS.indexOf(tab)]
+      const desc = TABS_DESCRIPTION[TABS.indexOf(tab)];
       data.screens.push(newScreen(tab, desc));
       data.index = data.screens.length - 1;
       renderTabPanel(tab);
