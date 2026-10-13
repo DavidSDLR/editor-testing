@@ -889,7 +889,7 @@
             </p>
           </div>
 
-          <p class="description"></p>
+          
         `;
 
         panels.appendChild(panel);
@@ -1000,8 +1000,7 @@
         : "No image attached yet.";
 
       const desc =
-        `Tab "${tab}": visible screen ${data.index + 1} of ${data.screens.length}. ` +
-        `${imagePart} Text: "${preview}".`;
+        `"${preview}".`;
 
       panel.querySelector(".description").textContent = desc;
     }
