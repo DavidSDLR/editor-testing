@@ -746,6 +746,16 @@
       "Calibration"
     ];
 
+    const TABS_DESCRIPTION = [
+      "The user sees this the first time they start the app. Here you can explain things like purpose or data privacy. It will only reappear after an app reset.",
+      "*If* you want users to pick their own sounds by combining different parameters, it happens in this section. Each parameter gets one page, each value one button.",
+      "Here you enter the items to let users rate the sound.",
+      "This is an optional section that can be reached from the Main Hub to educate users about the background of your study.",
+      "Here you can set the content the users see while the sound is playing.",
+      "This is the main menu from which the user starts the other sections.",
+      "This is a pre-defined method for calibrating the device volume which will be shown *once* after the introduction, *if* you choose to have this feature."
+    ];
+      
     const SCREEN_WIDTH = 250;
 
     const tablist = document.getElementById("tablist");
@@ -770,21 +780,21 @@
     TABS.forEach(tab => {
       state.tabs[tab] = {
         index: 0,
-        screens: [newScreen(tab)]
+        screens: [newScreen(tab, description)]
       };
     });
 
-    function newScreen(tab) {
+    function newScreen(tab, description) {
       return {
         id: uid(),
         image: null,
         imageName: null,
-        text: defaultText(tab)
+        text: defaultText(tab, description)
       };
     }
 
-    function defaultText(tab) {
-      return `${tab} — tap here to edit this screen text.`;
+    function defaultText(tab, description) {
+      return `${tab} — ${description}`;
     }
 
     function uid() {
@@ -998,7 +1008,7 @@
 
     function addScreen(tab) {
       const data = state.tabs[tab];
-      data.screens.push(newScreen(tab));
+      data.screens.push(newScreen(tab, description));
       data.index = data.screens.length - 1;
       renderTabPanel(tab);
       status(`Added a new screen to ${tab}.`, "success");
