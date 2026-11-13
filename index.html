@@ -874,6 +874,8 @@
               </button>
             </div>
 
+            <div class="description"></div>
+
             <button
               type="button"
               class="plus"
@@ -985,24 +987,15 @@
       updateDescription(tab);
     }
 
-    function updateDescription(tab) {
-      const data = state.tabs[tab];
+        function updateDescription(tab) {
       const panel = panelMap[tab];
-      const screen = data.screens[data.index];
+      const el = panel && panel.querySelector(".description");
+      if (!el) return;
 
-      const text = screen.text.replace(/\s+/g, " ").trim();
-      const preview = text
-        ? (text.length > 96 ? text.slice(0, 96) + "…" : text)
-        : "empty";
+      const desc = TABS_DESCRIPTION[TABS.indexOf(tab)] || "";
 
-      const imagePart = screen.imageName
-        ? `Attached image: ${screen.imageName}.`
-        : "No image attached yet.";
-
-      const desc =
-        `"${preview}".`;
-
-      panel.querySelector(".description").textContent = desc;
+      // render *word* as emphasis, after escaping
+      el.innerHTML = escapeHTML(desc).replace(/\*(.+?)\*/g, "<em>$1</em>");
     }
 
     function addScreen(tab) {
